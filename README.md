@@ -24,8 +24,9 @@ Third-party desktops (e.g. Dudu desktop) embed DiPlay's main task in their pictu
 
 On-vehicle screenshots (Dudu desktop):
 
-<img src="screenshots/pip-carplay-dark.png" width="45%" alt="Dudu desktop with DiPlay (dark)" />
-<img src="screenshots/pip-carplay-light.png" width="45%" alt="Dudu desktop (light)" />
+<img src="screenshots/pip-carplay-dark.png" width="30%" alt="Dudu desktop with DiPlay (dark)" />
+<img src="screenshots/pip-carplay-light.png" width="30%" alt="Dudu desktop (light)" />
+<img src="screenshots/IMG_0396.jpeg" width="30%" alt="Dudu desktop on vehicle" />
 
 ## Everything else
 

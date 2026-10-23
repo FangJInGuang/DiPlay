@@ -24,8 +24,9 @@
 
 上車實拍（嘟嘟桌面）：
 
-<img src="screenshots/pip-carplay-dark.png" width="45%" alt="嘟嘟桌面（深色）" />
-<img src="screenshots/pip-carplay-light.png" width="45%" alt="嘟嘟桌面（淺色）" />
+<img src="screenshots/pip-carplay-dark.png" width="30%" alt="嘟嘟桌面（深色）" />
+<img src="screenshots/pip-carplay-light.png" width="30%" alt="嘟嘟桌面（淺色）" />
+<img src="screenshots/IMG_0396.jpeg" width="30%" alt="上車實拍" />
 
 ## 其餘部分
 
