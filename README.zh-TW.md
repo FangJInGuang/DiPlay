@@ -22,6 +22,11 @@
 - 預期現象（非回歸）：點「立即連接」會短暫跳出卡片（按返回鍵重新嵌入）；透過嘟嘟開啟全螢幕、拖動卡片大小、全螢幕 ⇄ 畫中畫切換會觸發 CarPlay 重連（屬上游既有畫布/顯示變更機制，與本改動無關）。
 - 實驗性標註：僅在該車型 + 該桌面驗證，其他裝置相容性持續追蹤。
 
+上車實拍（嘟嘟桌面）：
+
+<img src="screenshots/pip-carplay-dark.png" width="45%" alt="嘟嘟桌面（深色）" />
+<img src="screenshots/pip-carplay-light.png" width="45%" alt="嘟嘟桌面（淺色）" />
+
 ## 其餘部分
 
 其餘程式碼、設定、文件與應用程式行為與上游 [v0.2.21](https://github.com/shihabal3amri/DiPlay/releases/tag/v0.2.21) 完全一致。

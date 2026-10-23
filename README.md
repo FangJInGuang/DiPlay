@@ -22,6 +22,11 @@ Third-party desktops (e.g. Dudu desktop) embed DiPlay's main task in their pictu
 - Expected behaviors (not regressions): tapping "Connect now" briefly leaves the card (press back to re-embed); opening full screen from the launcher, resizing the card, or switching full-screen ⇄ picture-in-picture triggers a CarPlay reconnect (the existing canvas/display-change behavior of upstream, unrelated to this change).
 - Experimental: validated on this vehicle + launcher only.
 
+On-vehicle screenshots (Dudu desktop):
+
+<img src="screenshots/pip-carplay-dark.png" width="45%" alt="Dudu desktop with DiPlay (dark)" />
+<img src="screenshots/pip-carplay-light.png" width="45%" alt="Dudu desktop (light)" />
+
 ## Everything else
 
 All other code, settings, docs and app behavior are identical to upstream [v0.2.21](https://github.com/shihabal3amri/DiPlay/releases/tag/v0.2.21).
