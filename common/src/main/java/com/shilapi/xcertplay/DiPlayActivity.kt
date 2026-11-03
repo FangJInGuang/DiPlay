@@ -5588,10 +5588,13 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
     }
 
     private fun carButtonControls(parent: LinearLayout) {
+        val brand = AirPlayPersistence.loadCarBrand(this)
+        val options = carBrandOptions()
+        val current = options.firstOrNull { it.key == brand } ?: options.first()
         val custom = AirPlayPersistence.loadCustomAirPlayIconFile(this)?.let { BitmapFactory.decodeFile(it.absolutePath) }
         val preview = row().apply { gravity = Gravity.CENTER_VERTICAL }
         preview.addView(ImageView(this).apply {
-            setImageBitmap(custom ?: BitmapFactory.decodeResource(resources, R.raw.ic_car_home))
+            setImageBitmap(custom ?: BitmapFactory.decodeResource(resources, current.iconRaw))
             scaleType = ImageView.ScaleType.CENTER_CROP
             background = rounded(SURFACE, BORDER)
             clipToOutline = true
@@ -5602,13 +5605,19 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         text.addView(label(getString(if (custom != null) R.string.car_button_icon_custom else R.string.default_icon), 14, MUTED).apply { setPadding(0, dp(6), 0, 0) })
         preview.addView(text, LinearLayout.LayoutParams(0, -2, 1f))
         parent.addView(preview)
+        // Brand badge row sits above "Choose image" so the preset picks the badge before a custom image.
+        val brandTitle = getString(R.string.settings_car_brand_title)
+        parent.addView(button("$brandTitle · ${getString(current.label)}", false) {
+            showCarBrandPicker(options, current.key)
+        }, matchButton(16, 60))
+        parent.addView(label(getString(R.string.settings_car_brand_summary), 14, MUTED).apply { setPadding(0, dp(8), 0, 0) })
         parent.addView(button(getString(R.string.choose_image), false) {
             launchCarButtonImagePicker(
                 openDocument = { iconDocumentPicker.launch(arrayOf("image/*")) },
                 getContent = { iconPicker.launch("image/*") },
                 documentPickerIsSystem = documentPickerIsSystem(),
             ).onFailure { toast(getString(R.string.this_head_unit_has_no_image_picker)) }
-        }, matchButton(16, 60))
+        }, matchButton(10, 60))
         if (custom != null) parent.addView(button(getString(R.string.default_icon), false) {
             AirPlayPersistence.clearCustomAirPlayIcon(this)
             refreshCarButton()
@@ -5622,7 +5631,78 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
                 carButtonSaved()
             }
         }, matchButton(10, 60))
+        if (custom != null || brand != AirPlayPersistence.DEFAULT_CAR_BRAND) parent.addView(
+            button(getString(R.string.settings_car_brand_reset), false) {
+                AirPlayPersistence.clearCustomAirPlayIcon(this)
+                AirPlayPersistence.saveCarBrand(this, AirPlayPersistence.DEFAULT_CAR_BRAND)
+                AirPlayPersistence.saveOemLabel(this, AirPlayPersistence.DEFAULT_OEM_LABEL)
+                refreshCarButton()
+                carButtonSaved()
+            }, matchButton(10, 60))
         parent.addView(label(getString(R.string.car_button_description), 14, MUTED).apply { setPadding(0, dp(12), 0, 0) })
+    }
+
+    private data class CarBrandOption(val key: String, val label: Int, val iconRaw: Int, val oemName: String)
+
+    private fun carBrandOptions(): List<CarBrandOption> = listOf(
+        CarBrandOption(AirPlayPersistence.DEFAULT_CAR_BRAND, R.string.settings_car_brand_default, R.raw.ic_car_home, AirPlayPersistence.DEFAULT_OEM_LABEL),
+        CarBrandOption("wangchao", R.string.settings_car_brand_wangchao, R.raw.ic_car_wangchao, "王朝"),
+        CarBrandOption("haiyang", R.string.settings_car_brand_haiyang, R.raw.ic_car_haiyang, "海洋"),
+        CarBrandOption("fangchengbao", R.string.settings_car_brand_fangchengbao, R.raw.ic_car_fangchengbao, "方程豹"),
+        CarBrandOption("denza", R.string.settings_car_brand_denza, R.raw.ic_car_denza, "腾势"),
+        CarBrandOption("yangwang", R.string.settings_car_brand_yangwang, R.raw.ic_car_yangwang, "仰望"),
+        CarBrandOption("linghui", R.string.settings_car_brand_linghui, R.raw.ic_car_linghui, "领汇"),
+    )
+
+    private fun showCarBrandPicker(options: List<CarBrandOption>, currentKey: String) {
+        var pending = options.indexOfFirst { it.key == currentKey }.coerceAtLeast(0)
+        val container = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val rows = options.map { option ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(20), dp(12), dp(20), dp(12))
+                isClickable = true
+            }
+            row.addView(ImageView(this).apply {
+                setImageBitmap(BitmapFactory.decodeResource(resources, option.iconRaw))
+            }, LinearLayout.LayoutParams(dp(28), dp(28)).apply { marginEnd = dp(16) })
+            row.addView(TextView(this).apply {
+                text = getString(option.label)
+                textSize = 16f
+                setTextColor(TEXT)
+            }, LinearLayout.LayoutParams(0, -2, 1f))
+            container.addView(row)
+            row
+        }
+        rows.forEachIndexed { index, row ->
+            row.setOnClickListener {
+                pending = index
+                rows.forEachIndexed { i, r ->
+                    (r.getChildAt(1) as? TextView)?.setTextColor(if (i == pending) ACCENT else TEXT)
+                }
+            }
+        }
+        fun highlight() {
+            rows.forEachIndexed { index, r ->
+                (r.getChildAt(1) as? TextView)?.setTextColor(if (index == pending) ACCENT else TEXT)
+            }
+        }
+        highlight()
+        appDialogBuilder().setTitle(getString(R.string.settings_car_brand_title))
+            .setView(container)
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
+                val picked = options[pending]
+                AirPlayPersistence.saveCarBrand(this, picked.key)
+                // iOS hides the car icon without a label, so the badge switches together with its name.
+                AirPlayPersistence.saveOemLabel(this, picked.oemName)
+                // Drop any gallery image so the new badge shows through.
+                AirPlayPersistence.clearCustomAirPlayIcon(this)
+                refreshCarButton()
+                carButtonSaved()
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
     }
 
     private fun carButtonSaved() {
